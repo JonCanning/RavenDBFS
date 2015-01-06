@@ -13,16 +13,27 @@ let load<'a> (id : string) (documentSession : IDocumentSession) =
 
 let store o (documentSession : IDocumentSession) = documentSession.Store o
 let saveChanges (documentSession : IDocumentSession) = documentSession.SaveChanges()
+let clear (documentSession : IDocumentSession) =
+  documentSession.Advanced.Clear()
+  documentSession
 
 let save o documentSession = 
   documentSession |> store o
   documentSession |> saveChanges
 
+let saveInStore o documentStore =
+  use session = documentStore |> openSession
+  session |> save o
+
+let loadFromStore<'a> id documentStore =
+  use session = documentStore |> openSession
+  session |> load<'a> id
+
 let setExpiration o (dateTime : DateTime) (documentSession : IDocumentSession) = 
   documentSession.Advanced.GetMetadataFor(o).["Raven-Expiration-Date"] <- RavenJValue(dateTime)
 
 let forEachInIndex<'a, 'b> f documentStore = 
-  let session = documentStore |> openSession
+  use session = documentStore |> openSession
   let enumerator = session.Query<'a> typeof<'b>.Name |> session.Advanced.Stream
   seq { 
     while enumerator.MoveNext() do
