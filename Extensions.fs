@@ -14,7 +14,7 @@ let load<'a> (id : string) (documentSession : IDocumentSession) =
 let store o (documentSession : IDocumentSession) = documentSession.Store o
 let saveChanges (documentSession : IDocumentSession) = documentSession.SaveChanges()
 
-let storeAndSave o documentSession = 
+let save o documentSession = 
   documentSession |> store o
   documentSession |> saveChanges
 
