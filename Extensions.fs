@@ -21,11 +21,11 @@ let save o documentSession =
   documentSession |> store o
   documentSession |> saveChanges
 
-let saveInStore o documentStore =
+let saveTo documentStore o =
   use session = documentStore |> openSession
   session |> save o
 
-let loadFromStore<'a> id documentStore =
+let load'<'a> id documentStore =
   use session = documentStore |> openSession
   session |> load<'a> id
 
