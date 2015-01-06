@@ -15,3 +15,12 @@ let store o (documentSession : IDocumentSession) = documentSession.Store o
 let saveChanges (documentSession : IDocumentSession) = documentSession.SaveChanges()
 let setExpiration o (dateTime : DateTime) (documentSession : IDocumentSession) = 
   documentSession.Advanced.GetMetadataFor(o).["Raven-Expiration-Date"] <- RavenJValue(dateTime)
+
+let forEachInIndex<'a, 'b> f documentStore = 
+  let session = documentStore |> openSession
+  let enumerator = session.Query<'a> typeof<'b>.Name |> session.Advanced.Stream
+  seq { 
+    while enumerator.MoveNext() do
+      yield enumerator.Current.Document
+  }
+  |> Seq.iter f
