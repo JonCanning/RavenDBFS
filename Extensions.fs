@@ -13,6 +13,11 @@ let load<'a> (id : string) (documentSession : IDocumentSession) =
 
 let store o (documentSession : IDocumentSession) = documentSession.Store o
 let saveChanges (documentSession : IDocumentSession) = documentSession.SaveChanges()
+
+let storeAndSave o documentSession = 
+  documentSession |> store o
+  documentSession |> saveChanges
+
 let setExpiration o (dateTime : DateTime) (documentSession : IDocumentSession) = 
   documentSession.Advanced.GetMetadataFor(o).["Raven-Expiration-Date"] <- RavenJValue(dateTime)
 
