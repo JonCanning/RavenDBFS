@@ -15,7 +15,9 @@ let load<'a> (id : string) (documentSession : IDocumentSession) =
   | o -> unbox<'a> o |> Some
 
 let store o (documentSession : IDocumentSession) = documentSession.Store o
+
 let saveChanges (documentSession : IDocumentSession) = documentSession.SaveChanges()
+
 let clear (documentSession : IDocumentSession) =
   documentSession.Advanced.Clear()
   documentSession
