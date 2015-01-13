@@ -11,8 +11,8 @@ let createDocumentStore connectionStringName =
 
 let load<'a> (id : string) (documentSession : IDocumentSession) = 
   try 
-    match documentSession.Load<'a> id |> box with
-    | null -> None
+    match documentSession.Load<'a> id with
+    | o when box o = null -> None
     | o -> Some o
   with
   | :? InvalidCastException -> None
