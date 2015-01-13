@@ -36,14 +36,17 @@ let load'<'a> id documentStore =
 let setExpiration o (dateTime : DateTime) (documentSession : IDocumentSession) = 
   documentSession.Advanced.GetMetadataFor(o).["Raven-Expiration-Date"] <- RavenJValue(dateTime)
 
-let forEachInIndex<'a, 'b> f documentStore = 
+let forEachInIndex<'a> index f documentStore = 
   use session = documentStore |> openSession
-  let enumerator = session.Query<'a> typeof<'b>.Name |> session.Advanced.Stream
+  let enumerator = session.Query<'a> index |> session.Advanced.Stream
   seq { 
     while enumerator.MoveNext() do
       yield enumerator.Current.Document
   }
   |> Seq.iter f
+
+let forEachInIndex'<'a, 'b> f documentStore = 
+  forEachInIndex<'a> typeof<'b>.Name f documentStore
 
 let replace e n (documentSession : IDocumentSession) = 
   documentSession.Advanced.Evict e
