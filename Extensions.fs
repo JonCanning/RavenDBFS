@@ -55,3 +55,18 @@ let replace e n (documentSession : IDocumentSession) =
   documentSession.Advanced.Evict e
   documentSession |> save n
   n
+
+let getAllFromQuery documentStore (query : IDocumentSession -> IDocumentQuery<'a> * RavenQueryStatistics) = 
+  let rec load count = 
+    seq { 
+      use session = documentStore |> openSession
+      let queryable, statistics = query session
+      let results = queryable.Take(1024).Skip(count).ToArray()
+      let count = count + results.Count()
+      for result in results do
+        yield result
+      match count with
+      | i when i = statistics.TotalResults -> ()
+      | _ -> yield! load count
+    }
+  load 0
