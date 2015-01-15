@@ -38,6 +38,12 @@ let load'<'a> id documentStore =
   use session = documentStore |> openSession
   session |> load<'a> id
 
+let delete id (documentSession : IDocumentSession) =
+  documentSession.Delete id
+
+let delete' id (documentStore : IDocumentStore) =
+  documentStore.DatabaseCommands.Delete(id, null)
+
 let setExpiration o (dateTime : DateTime) (documentSession : IDocumentSession) = 
   documentSession.Advanced.GetMetadataFor(o).["Raven-Expiration-Date"] <- RavenJValue(dateTime)
 
