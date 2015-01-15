@@ -4,6 +4,7 @@ open Raven.Client
 open Raven.Client.Document
 open Raven.Json.Linq
 open System
+open System.Linq
 
 let openSession (documentStore : IDocumentStore) = documentStore.OpenSession()
 let createDocumentStore connectionStringName = 
