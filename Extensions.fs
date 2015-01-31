@@ -69,11 +69,11 @@ let getAllFromQuery documentStore (query : IDocumentSession -> IDocumentQuery<'a
       use session = documentStore |> openSession
       let queryable, statistics = query session
       let results = queryable.Take(1024).Skip(count).ToArray()
-      let count = count + results.Count()
+      let count = count + 1024
       for result in results do
         yield result
       match count with
-      | i when i = statistics.TotalResults -> ()
+      | i when i >= statistics.TotalResults -> ()
       | _ -> yield! load count
     }
   load 0
