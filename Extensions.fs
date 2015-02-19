@@ -1,5 +1,6 @@
 module Raven.Client
 
+open Raven.Abstractions.Data
 open Raven.Client
 open Raven.Client.Document
 open Raven.Json.Linq
@@ -38,12 +39,8 @@ let load'<'a> id documentStore =
   use session = documentStore |> openSession
   session |> load<'a> id
 
-let delete id (documentSession : IDocumentSession) =
-  documentSession.Delete id
-
-let delete' id (documentStore : IDocumentStore) =
-  documentStore.DatabaseCommands.Delete(id, null)
-
+let delete id (documentSession : IDocumentSession) = documentSession.Delete id
+let delete' id (documentStore : IDocumentStore) = documentStore.DatabaseCommands.Delete(id, null)
 let setExpiration o (dateTime : DateTime) (documentSession : IDocumentSession) = 
   documentSession.Advanced.GetMetadataFor(o).["Raven-Expiration-Date"] <- RavenJValue(dateTime)
 
@@ -61,9 +58,8 @@ let forEachInIndex'<'a, 'b> f documentStore = forEachInIndex<'a> typeof<'b>.Name
 let replace e n (documentSession : IDocumentSession) = 
   documentSession.Advanced.Evict e
   documentSession |> save n
-  n
 
-let getAllFromQuery documentStore (query : IDocumentSession -> IDocumentQuery<'a> * RavenQueryStatistics) = 
+let getAllFromQuery documentStore (query : IDocumentSession -> (IDocumentQuery<'a> * RavenQueryStatistics)) = 
   let rec load count = 
     seq { 
       use session = documentStore |> openSession
@@ -78,4 +74,21 @@ let getAllFromQuery documentStore (query : IDocumentSession -> IDocumentQuery<'a
     }
   load 0
 
-let bulkInsert (documentStore : IDocumentStore) = documentStore.BulkInsert()
+let bulkInsert options (documentStore : IDocumentStore) = 
+  documentStore.BulkInsert(options = match options with
+                                     | None -> null
+                                     | Some options -> options)
+
+let metadata = RavenJObject()
+
+let add (key, value) (metadata : RavenJObject) = 
+  metadata.Add(key, RavenJToken.FromObject value)
+  metadata
+
+let defaultMetadata (documentStore : IDocumentStore) o = 
+  metadata
+  |> add (Constants.RavenEntityName, documentStore.Conventions.GetDynamicTagName o)
+  |> add (Constants.RavenClrType, o.GetType() |> documentStore.Conventions.GetClrTypeName)
+
+let withExpirationDate expirationDate (metadata : RavenJObject) = 
+  metadata |> add ("Raven-Expiration-Date", expirationDate)
