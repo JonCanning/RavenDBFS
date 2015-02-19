@@ -77,3 +77,5 @@ let getAllFromQuery documentStore (query : IDocumentSession -> IDocumentQuery<'a
       | _ -> yield! load count
     }
   load 0
+
+let bulkInsert (documentStore : IDocumentStore) = documentStore.BulkInsert()
