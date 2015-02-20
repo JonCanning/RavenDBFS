@@ -79,16 +79,16 @@ let bulkInsert options (documentStore : IDocumentStore) =
                                      | None -> null
                                      | Some options -> options)
 
-let metadata = RavenJObject()
+let metadata() = RavenJObject()
 
 let add (key, value) (metadata : RavenJObject) = 
   metadata.Add(key, RavenJToken.FromObject value)
   metadata
 
-let defaultMetadata (documentStore : IDocumentStore) o = 
-  metadata
+let defaultMetadata<'a> (documentStore : IDocumentStore) (o : 'a) = 
+  metadata()
   |> add (Constants.RavenEntityName, documentStore.Conventions.GetDynamicTagName o)
-  |> add (Constants.RavenClrType, o.GetType() |> documentStore.Conventions.GetClrTypeName)
+  |> add (Constants.RavenClrType, typeof<'a> |> documentStore.Conventions.GetClrTypeName)
 
 let withExpirationDate expirationDate (metadata : RavenJObject) = 
   metadata |> add ("Raven-Expiration-Date", expirationDate)
